@@ -1,3 +1,4 @@
+
 export interface ComputeNode {
   id: string;
   name: string;
@@ -9,6 +10,8 @@ export interface ComputeNode {
   availability: number; // 0-100%
   status: 'IDLE' | 'BUSY' | 'OFFLINE';
   provider: string;
+  isVerified: boolean; // New: Trust signal
+  slaTier: 'Standard' | 'Gold' | 'Enterprise'; // New: Reliability metric
 }
 
 export interface NetworkStats {
@@ -54,8 +57,25 @@ export interface HardwareMonitor {
   memoryUsage: number; // %
 }
 
-// Navigation types
-export type View = 'DASHBOARD' | 'MARKETPLACE' | 'DEPLOY' | 'PROVIDER';
+// New: Preconfigured Deployment Templates
+export interface ModelTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // Lucide icon name or emoji
+  prompt: string;
+  category: 'LLM' | 'Image' | 'Data';
+}
+
+// Navigation types - Expanded for full feature set
+export type View = 
+  | 'DASHBOARD' 
+  | 'MARKETPLACE' 
+  | 'DEPLOY' 
+  | 'PROVIDER' 
+  | 'SECURITY' 
+  | 'TOKEN_CREATOR' 
+  | 'WHITE_LABEL';
 
 // Algorithm types
 export type Algorithm = 'KawPow' | 'RandomX' | 'Autolykos2' | 'Llama3-70b';

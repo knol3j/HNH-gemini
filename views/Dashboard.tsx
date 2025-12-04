@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NetworkStats } from '../types';
-import { Activity, Server, Zap, Cpu, HardDrive, Terminal } from 'lucide-react';
+import { Activity, Server, Zap, Cpu, HardDrive, Terminal, Calculator, ArrowRight, TrendingUp } from 'lucide-react';
 import { MOCK_JOBS } from '../services/mockData';
 
 interface DashboardProps {
@@ -9,6 +9,23 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ stats, aiAnalysis }) => {
+  const [calcGpu, setCalcGpu] = useState('RTX 4090');
+
+  // Simple static estimation logic for the calculator
+  const getEstimates = (gpu: string) => {
+    switch (gpu) {
+      case 'NVIDIA H100': return { mining: 0.10, ai: 2.50 };
+      case 'NVIDIA A100': return { mining: 0.15, ai: 1.10 };
+      case 'RTX 4090': return { mining: 0.80, ai: 0.45 };
+      case 'RTX 3090': return { mining: 0.60, ai: 0.25 };
+      default: return { mining: 0, ai: 0 };
+    }
+  };
+
+  const estimates = getEstimates(calcGpu);
+  const aiPremium = ((estimates.ai - estimates.mining) / estimates.mining * 100).toFixed(0);
+  const isAiProfitable = estimates.ai > estimates.mining;
+
   return (
     <div className="space-y-6">
       <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -82,16 +99,75 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, aiAnalysis }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart Section - Placeholder for Real Data */}
-        <div className="lg:col-span-2 bg-surface border border-white/5 rounded-2xl p-6 flex items-center justify-center min-h-[300px]">
-           <div className="text-center">
-             <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Activity className="text-muted" size={32} />
+        {/* Profitability Calculator (Value Add) */}
+        <div className="lg:col-span-2 bg-surface border border-white/5 rounded-2xl p-6">
+           <div className="flex items-center gap-3 mb-6">
+             <div className="bg-primary/20 p-2 rounded-lg">
+               <Calculator className="text-primary" size={20} />
              </div>
-             <h3 className="text-lg font-semibold text-white">Metrics Unavailable</h3>
-             <p className="text-muted max-w-sm mt-2">
-               Connect your wallet or a node to view real-time network telemetry and personal usage stats.
-             </p>
+             <div>
+               <h3 className="text-lg font-semibold text-white">Profitability Calculator</h3>
+               <p className="text-xs text-muted">Estimate earnings: Crypto Mining vs. AI Compute</p>
+             </div>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="space-y-4">
+                 <label className="text-sm text-muted uppercase font-bold">Hardware Model</label>
+                 <select 
+                    value={calcGpu}
+                    onChange={(e) => setCalcGpu(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                 >
+                   <option value="NVIDIA H100">NVIDIA H100 (Enterprise)</option>
+                   <option value="NVIDIA A100">NVIDIA A100 (Enterprise)</option>
+                   <option value="RTX 4090">NVIDIA RTX 4090 (Consumer)</option>
+                   <option value="RTX 3090">NVIDIA RTX 3090 (Consumer)</option>
+                 </select>
+                 
+                 <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                    <div className="flex justify-between text-sm mb-2">
+                       <span className="text-muted">Avg. Mining Revenue</span>
+                       <span className="text-white">${estimates.mining.toFixed(2)}/hr</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-2">
+                       <span className="text-muted">Avg. Compute Revenue</span>
+                       <span className="text-primary font-bold">${estimates.ai.toFixed(2)}/hr</span>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                       <div className="flex items-center gap-2">
+                          <TrendingUp size={16} className={isAiProfitable ? 'text-green-500' : 'text-red-500'} />
+                          <span className={`text-sm font-bold ${isAiProfitable ? 'text-green-500' : 'text-red-500'}`}>
+                             {isAiProfitable ? `AI is ${aiPremium}% more profitable` : 'Mining is currently more profitable'}
+                          </span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Visual Bar Chart */}
+              <div className="relative h-48 flex items-end justify-around pb-6 border-b border-white/10">
+                 <div className="w-16 flex flex-col justify-end group">
+                    <div 
+                      className="bg-gray-600 rounded-t-lg transition-all duration-500 group-hover:bg-gray-500"
+                      style={{ height: `${(estimates.mining / 3) * 100}%`, minHeight: '10px' }}
+                    ></div>
+                    <span className="text-xs text-center mt-2 text-muted">Mining</span>
+                 </div>
+                 <div className="w-16 flex flex-col justify-end group">
+                    <div 
+                      className="bg-primary rounded-t-lg transition-all duration-500 relative group-hover:bg-primary-hover shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                      style={{ height: `${(estimates.ai / 3) * 100}%`, minHeight: '10px' }}
+                    >
+                      {isAiProfitable && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded">
+                          {estimates.ai.toFixed(2)}x
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-center mt-2 text-primary font-bold">Compute</span>
+                 </div>
+              </div>
            </div>
         </div>
 
@@ -115,8 +191,8 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, aiAnalysis }) => {
             )}
           </div>
           
-          <button className="w-full mt-4 py-2 border border-dashed border-white/20 rounded-lg text-sm text-muted hover:text-white hover:border-white/40 transition-colors">
-            + Deploy New Container
+          <button className="w-full mt-4 py-2 border border-dashed border-white/20 rounded-lg text-sm text-muted hover:text-white hover:border-white/40 transition-colors flex items-center justify-center gap-2">
+            Deploy New Container <ArrowRight size={14} />
           </button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { View, NetworkStats } from './types';
@@ -6,7 +7,10 @@ import { getNetworkStatusAnalysis } from './services/geminiService';
 import Dashboard from './views/Dashboard';
 import Marketplace from './views/Portfolio'; // Reusing file path
 import DeployJob from './views/HedgeLab'; // Reusing file path
-import Provider from './views/Provider'; // New view
+import Provider from './views/Provider'; 
+import Security from './views/Security';
+import TokenCreator from './views/TokenCreator';
+import WhiteLabel from './views/WhiteLabel';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('DASHBOARD');
@@ -36,6 +40,15 @@ const App: React.FC = () => {
       )}
       {currentView === 'PROVIDER' && (
         <Provider />
+      )}
+      {currentView === 'SECURITY' && (
+        <Security />
+      )}
+      {currentView === 'TOKEN_CREATOR' && (
+        <TokenCreator />
+      )}
+      {currentView === 'WHITE_LABEL' && (
+        <WhiteLabel />
       )}
     </Layout>
   );

@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { View } from '../types';
-import { LayoutDashboard, Cpu, Rocket, Server, Menu, X, Globe, Wallet, Zap } from 'lucide-react';
+import { LayoutDashboard, Cpu, Rocket, Server, Menu, X, Globe, Wallet, Zap, Shield, Coins, Palette } from 'lucide-react';
 
 interface LayoutProps {
   currentView: View;
@@ -95,7 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
   return (
     <div className="flex min-h-screen bg-background text-text selection:bg-primary/30 font-sans">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-surface/50 backdrop-blur-xl fixed h-full z-20">
+      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-surface/50 backdrop-blur-xl fixed h-full z-20 overflow-y-auto">
         <div className="p-6 border-b border-white/5">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setCurrentView('DASHBOARD')}>
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-800 flex items-center justify-center shadow-lg shadow-primary/20">
@@ -114,7 +115,12 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
           <NavItem view="MARKETPLACE" icon={Server} label="Compute Market" />
           <NavItem view="DEPLOY" icon={Rocket} label="Deploy Job" />
           
-          <div className="mt-8 px-4 py-2 text-xs font-bold text-muted uppercase tracking-widest">Supply Side</div>
+          <div className="mt-6 px-4 py-2 text-xs font-bold text-muted uppercase tracking-widest">Tools</div>
+          <NavItem view="SECURITY" icon={Shield} label="Security Center" />
+          <NavItem view="TOKEN_CREATOR" icon={Coins} label="Token Factory" />
+          <NavItem view="WHITE_LABEL" icon={Palette} label="White Label" />
+
+          <div className="mt-6 px-4 py-2 text-xs font-bold text-muted uppercase tracking-widest">Supply Side</div>
           <NavItem view="PROVIDER" icon={Zap} label="Host Node" badge="EARN" />
         </nav>
 
@@ -167,10 +173,13 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-background/95 z-20 pt-20 px-6 space-y-4 md:hidden">
+        <div className="fixed inset-0 bg-background/95 z-20 pt-20 px-6 space-y-4 md:hidden overflow-y-auto pb-10">
           <NavItem view="DASHBOARD" icon={LayoutDashboard} label="Overview" />
           <NavItem view="MARKETPLACE" icon={Server} label="Marketplace" />
           <NavItem view="DEPLOY" icon={Rocket} label="Deploy Job" />
+          <NavItem view="SECURITY" icon={Shield} label="Security" />
+          <NavItem view="TOKEN_CREATOR" icon={Coins} label="Token Creator" />
+          <NavItem view="WHITE_LABEL" icon={Palette} label="White Label" />
           <NavItem view="PROVIDER" icon={Zap} label="Host Node" />
           <button 
              onClick={connectWallet}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { JobSpec } from '../types';
 import { analyzeComputeRequirements } from '../services/geminiService';
-import { Bot, Zap, ArrowRight, Loader2, Shield, AlertTriangle, Code, Copy, Check } from 'lucide-react';
+import { Bot, Zap, ArrowRight, Loader2, Shield, AlertTriangle, Code, Copy, Check, LayoutTemplate, Brain, Image as ImageIcon, Mic } from 'lucide-react';
+import { DEPLOYMENT_TEMPLATES } from '../services/mockData';
 
 const DeployJob: React.FC = () => {
   const [taskInput, setTaskInput] = useState('');
@@ -31,8 +32,17 @@ const DeployJob: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const getIcon = (name: string) => {
+    switch(name) {
+      case 'Brain': return <Brain size={20} className="text-purple-400" />;
+      case 'Image': return <ImageIcon size={20} className="text-pink-400" />;
+      case 'Mic': return <Mic size={20} className="text-blue-400" />;
+      default: return <Bot size={20} />;
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
        <div className="text-center space-y-4">
          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
            AI Job Orchestrator
@@ -42,6 +52,27 @@ const DeployJob: React.FC = () => {
          </p>
        </div>
 
+       {/* Quick Start Templates */}
+       {!showPayload && !jobSpec && (
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
+           {DEPLOYMENT_TEMPLATES.map(template => (
+             <button
+               key={template.id}
+               onClick={() => setTaskInput(template.prompt)}
+               className="bg-surface border border-white/5 hover:border-primary/40 rounded-xl p-4 text-left transition-all hover:bg-white/5 group"
+             >
+                <div className="flex items-center gap-3 mb-2">
+                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
+                     {getIcon(template.icon)}
+                   </div>
+                   <h3 className="font-bold text-white text-sm">{template.name}</h3>
+                </div>
+                <p className="text-xs text-muted line-clamp-2">{template.description}</p>
+             </button>
+           ))}
+         </div>
+       )}
+
        {/* Input Section */}
        {!showPayload && (
          <div className="bg-surface border border-white/10 rounded-2xl p-2 relative shadow-2xl animate-fade-in">
@@ -49,7 +80,7 @@ const DeployJob: React.FC = () => {
               value={taskInput}
               onChange={(e) => setTaskInput(e.target.value)}
               placeholder="e.g., I need to fine-tune Llama-3-70b on a custom dataset. I need high memory bandwidth and redundancy..."
-              className="w-full h-32 bg-transparent text-white p-4 text-lg focus:outline-none resize-none"
+              className="w-full h-32 bg-transparent text-white p-4 text-lg focus:outline-none resize-none placeholder:text-white/20"
             />
             <div className="flex justify-between items-center px-4 pb-2">
               <span className="text-xs text-muted flex items-center gap-1">
@@ -58,7 +89,7 @@ const DeployJob: React.FC = () => {
               <button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !taskInput}
-                className="bg-primary hover:bg-primary-hover text-black font-bold px-6 py-2 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary-hover text-black font-bold px-6 py-2 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
               >
                 {isAnalyzing ? <Loader2 className="animate-spin" /> : <Zap size={18} fill="currentColor" />}
                 {isAnalyzing ? 'Orchestrating...' : 'Analyze & Match'}
@@ -78,8 +109,13 @@ const DeployJob: React.FC = () => {
                    <h3 className="text-2xl font-bold text-white">{jobSpec.title}</h3>
                    <p className="text-gray-400 mt-1">{jobSpec.description}</p>
                  </div>
-                 <div className="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-lg font-mono font-bold text-lg">
-                   {jobSpec.recommendedGpu}
+                 <div className="flex flex-col items-end gap-2">
+                    <div className="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-lg font-mono font-bold text-lg">
+                      {jobSpec.recommendedGpu}
+                    </div>
+                    <button onClick={() => setJobSpec(null)} className="text-xs text-muted hover:text-white underline">
+                      Reset / New Analysis
+                    </button>
                  </div>
                </div>
 

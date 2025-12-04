@@ -1,4 +1,4 @@
-import { ComputeNode, NetworkStats, ActiveJob, ProviderStats } from '../types';
+import { ComputeNode, NetworkStats, ActiveJob, ProviderStats, ModelTemplate } from '../types';
 
 export const MOCK_NODES: ComputeNode[] = [
   {
@@ -11,7 +11,9 @@ export const MOCK_NODES: ComputeNode[] = [
     region: 'US-East',
     availability: 98,
     status: 'IDLE',
-    provider: '0x3a...9f2'
+    provider: '0x3a...9f2',
+    isVerified: true,
+    slaTier: 'Enterprise'
   },
   {
     id: 'node-02',
@@ -23,7 +25,9 @@ export const MOCK_NODES: ComputeNode[] = [
     region: 'EU-Central',
     availability: 100,
     status: 'BUSY',
-    provider: '0x7b...c1a'
+    provider: '0x7b...c1a',
+    isVerified: true,
+    slaTier: 'Gold'
   },
   {
     id: 'node-03',
@@ -35,7 +39,9 @@ export const MOCK_NODES: ComputeNode[] = [
     region: 'Asia-South',
     availability: 85,
     status: 'IDLE',
-    provider: '0x1c...e4d'
+    provider: '0x1c...e4d',
+    isVerified: false,
+    slaTier: 'Standard'
   },
   {
     id: 'node-04',
@@ -47,7 +53,9 @@ export const MOCK_NODES: ComputeNode[] = [
     region: 'US-West',
     availability: 92,
     status: 'IDLE',
-    provider: '0x9d...a2b'
+    provider: '0x9d...a2b',
+    isVerified: false,
+    slaTier: 'Standard'
   },
   {
     id: 'node-05',
@@ -59,7 +67,9 @@ export const MOCK_NODES: ComputeNode[] = [
     region: 'US-East',
     availability: 99,
     status: 'BUSY',
-    provider: '0x4f...11a'
+    provider: '0x4f...11a',
+    isVerified: true,
+    slaTier: 'Enterprise'
   }
 ];
 
@@ -81,3 +91,30 @@ export const MOCK_PROVIDER_STATS: ProviderStats = {
   uptime: 0,
   activeJobs: 0
 };
+
+export const DEPLOYMENT_TEMPLATES: ModelTemplate[] = [
+  {
+    id: 't-1',
+    name: 'Llama 3 70B Fine-Tune',
+    description: 'Fine-tune Meta\'s latest model on a custom JSONL dataset.',
+    icon: 'Brain',
+    category: 'LLM',
+    prompt: 'I want to fine-tune Llama 3 70B using LoRA on a custom dataset of 100k samples. I need high VRAM (A100/H100) and fast interconnects for distributed training. Estimate roughly 4 hours.'
+  },
+  {
+    id: 't-2',
+    name: 'Stable Diffusion XL Render',
+    description: 'Batch image generation with ControlNet support.',
+    icon: 'Image',
+    category: 'Image',
+    prompt: 'I need to run a batch inference job using Stable Diffusion XL with ControlNet. I have 5000 prompts to process. Consumer grade GPUs (RTX 4090) are acceptable to keep costs low.'
+  },
+  {
+    id: 't-3',
+    name: 'Whisper Audio Transcription',
+    description: 'Process large-scale audio datasets into text.',
+    icon: 'Mic',
+    category: 'Data',
+    prompt: 'I have 200 hours of .wav audio files that need transcription using OpenAI Whisper Large v3. High CPU/RAM is less important than raw CUDA core count for inference throughput.'
+  }
+];

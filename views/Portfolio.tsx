@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { ComputeNode } from '../types';
 import { MOCK_NODES } from '../services/mockData';
-import { Server, Cpu, MapPin, Zap, Filter } from 'lucide-react';
+import { Server, Cpu, MapPin, Zap, Filter, BadgeCheck, ShieldCheck } from 'lucide-react';
 
 const Marketplace: React.FC = () => {
   const [filterGpu, setFilterGpu] = useState('All');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   
-  const filteredNodes = filterGpu === 'All' 
-    ? MOCK_NODES 
-    : MOCK_NODES.filter(n => n.gpuModel.includes(filterGpu));
+  const filteredNodes = MOCK_NODES.filter(n => {
+    const matchesGpu = filterGpu === 'All' || n.gpuModel.includes(filterGpu);
+    const matchesVerified = verifiedOnly ? n.isVerified : true;
+    return matchesGpu && matchesVerified;
+  });
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -17,28 +20,52 @@ const Marketplace: React.FC = () => {
           <h2 className="text-3xl font-bold text-white mb-2">Compute Marketplace</h2>
           <p className="text-muted">Rent high-performance decentralized GPU nodes for AI training and rendering.</p>
         </div>
-        <div className="flex gap-2 bg-surface p-1 rounded-xl border border-white/10">
-           {['All', 'H100', 'A100', '4090'].map(type => (
-             <button
-               key={type}
-               onClick={() => setFilterGpu(type)}
-               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                 filterGpu === type 
-                 ? 'bg-primary text-black shadow-lg' 
-                 : 'text-muted hover:text-white'
-               }`}
-             >
-               {type}
-             </button>
-           ))}
+        <div className="flex flex-col sm:flex-row gap-4">
+           {/* Trust Filter */}
+           <button 
+             onClick={() => setVerifiedOnly(!verifiedOnly)}
+             className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+                verifiedOnly 
+                ? 'bg-blue-500/20 border-blue-500 text-blue-400' 
+                : 'bg-surface border-white/10 text-muted hover:text-white'
+             }`}
+           >
+             <BadgeCheck size={16} /> Verified Only
+           </button>
+
+           <div className="flex gap-2 bg-surface p-1 rounded-xl border border-white/10 overflow-x-auto">
+             {['All', 'H100', 'A100', '4090'].map(type => (
+               <button
+                 key={type}
+                 onClick={() => setFilterGpu(type)}
+                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                   filterGpu === type 
+                   ? 'bg-primary text-black shadow-lg' 
+                   : 'text-muted hover:text-white'
+                 }`}
+               >
+                 {type}
+               </button>
+             ))}
+           </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 gap-4">
+        {filteredNodes.length === 0 && (
+           <div className="text-center py-20 text-muted">
+             <Server size={48} className="mx-auto mb-4 opacity-20" />
+             <p>No nodes found matching criteria.</p>
+           </div>
+        )}
         {filteredNodes.map((node) => (
-          <div key={node.id} className="bg-surface border border-white/5 rounded-xl p-5 hover:border-primary/50 transition-all group flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div key={node.id} className="bg-surface border border-white/5 rounded-xl p-5 hover:border-primary/50 transition-all group flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden">
+             
+             {/* Verified Background Gradient */}
+             {node.isVerified && <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>}
+
              {/* Icon/Status */}
-             <div className="flex-shrink-0 relative">
+             <div className="flex-shrink-0 relative ml-2">
                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border border-white/10 ${node.status === 'IDLE' ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
                  <Server className={node.status === 'IDLE' ? 'text-emerald-500' : 'text-amber-500'} size={32} />
                </div>
@@ -48,12 +75,15 @@ const Marketplace: React.FC = () => {
              {/* Details */}
              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                <div>
-                 <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{node.gpuModel}</h3>
+                 <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{node.gpuModel}</h3>
+                    {node.isVerified && <BadgeCheck size={16} className="text-blue-500" title="Verified Provider" />}
+                 </div>
                  <p className="text-sm text-muted">{node.name}</p>
                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                    <MapPin size={12} /> {node.region}
                    <span className="text-white/20">|</span>
-                   <span className="font-mono">{node.provider}</span>
+                   <span className="font-mono text-[10px]">{node.provider}</span>
                  </div>
                </div>
 
@@ -63,8 +93,10 @@ const Marketplace: React.FC = () => {
                    <p className="font-mono text-white flex items-center gap-1"><Cpu size={14} className="text-accent"/> {node.vram} GB</p>
                  </div>
                  <div>
-                   <p className="text-xs text-muted uppercase">Performance</p>
-                   <p className="font-mono text-white flex items-center gap-1"><Zap size={14} className="text-yellow-500"/> {node.tflops} TFLOPS</p>
+                   <p className="text-xs text-muted uppercase">SLA Tier</p>
+                   <p className={`font-mono flex items-center gap-1 text-sm ${node.slaTier === 'Enterprise' ? 'text-purple-400 font-bold' : 'text-white'}`}>
+                      <ShieldCheck size={14} /> {node.slaTier}
+                   </p>
                  </div>
                </div>
 
